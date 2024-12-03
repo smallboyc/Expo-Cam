@@ -25,7 +25,7 @@ export default function Camera() {
         );
     }
 
-    function toggleCameraFacing() {
+    const toggleCameraFacing = () => {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
@@ -36,25 +36,28 @@ export default function Camera() {
                 base64: true,
                 exif: false,
             };
-            const takedPhoto = await cameraRef.current.takePictureAsync(options);
-
-            setPhoto(takedPhoto);
+            try {
+                const takedPhoto = await cameraRef.current.takePictureAsync(options);
+                // console.log('Captured photo base64:', takedPhoto?.base64);
+                setPhoto(takedPhoto);
+            } catch (error) {
+                console.error("capture error :", error);
+            }
         }
     };
+    
 
-    const handleRetakePhoto = () => setPhoto(null);
-
-    if (photo) return <PhotoPreviewSection photo={photo} handleRetakePhoto={handleRetakePhoto} />
-
-    return (
+    return photo ? (
+        <PhotoPreviewSection photo={photo} handleRetakePhoto={() => setPhoto(null)} />
+    ) : (
         <View style={styles.container}>
             <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-                        <AntDesign name='retweet' size={44} color='black' />
+                        <AntDesign name="retweet" size={44} color="black" />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-                        <AntDesign name='camera' size={44} color='black' />
+                        <AntDesign name="camera" size={44} color="black" />
                     </TouchableOpacity>
                 </View>
             </CameraView>
