@@ -1,14 +1,11 @@
-import { Fontisto } from '@expo/vector-icons';
-import { CameraCapturedPicture } from 'expo-camera';
 import React, { useState, useRef } from 'react';
+import { CameraView, CameraCapturedPicture, useCameraPermissions } from 'expo-camera';
 import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View, Button, Text } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions, CameraType } from 'expo-camera';
+import Feather from '@expo/vector-icons/Feather';
 
 export default function Index() {
-  const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
-  const [photos, setPhotos] = useState<(CameraCapturedPicture | undefined)[]>([]);  // initialize photos array
+  const [photos, setPhotos] = useState<(CameraCapturedPicture | undefined)[]>([]);  // photos array
   const cameraRef = useRef<CameraView | null>(null);
 
   if (!permission) {
@@ -26,43 +23,39 @@ export default function Index() {
     );
   }
 
-  function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  }
-
   const handleTakePhoto = async () => {
-    if (cameraRef.current && photos.length < 3) {  // Limiter à 3 photos
+    if (cameraRef.current && photos.length < 3) {  // 3 photos max
       const options = {
         quality: 1,
         base64: true,
         exif: false,
       };
-      const takenPhoto = await cameraRef.current.takePictureAsync(options);
-
-      // Ajouter la photo à l'état
-      setPhotos(prevPhotos => [...prevPhotos, takenPhoto]);
+      try {
+        const takenPhoto = await cameraRef.current.takePictureAsync(options);
+        setPhotos(prevPhotos => [...prevPhotos, takenPhoto]);
+      } catch (error) {
+        console.log(`Error ! : ${error}`)
+      }
     }
   };
 
   const handleRetakePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index);  // Supprimer l'élément à l'index donné
+    const newPhotos = photos.filter((_, i) => i !== index); //remove image
     setPhotos(newPhotos);
   };
 
   const handleSendPhotos = () => {
-    console.log('Sending photos:', photos);  // Envoyer les photos au script
+    console.log("Sending photos...");  // TODO : send image to a new script / OCR ?
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cameraContainer}>
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+        <CameraView style={styles.camera} ref={cameraRef}>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-              <AntDesign name="retweet" size={44} color="black" />
-            </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-              <AntDesign name="camera" size={44} color="black" />
+              {photos.length < 3 ? <Feather name="camera" size={40} color="white" /> : <Feather name="camera-off" size={40} color="white" />}
+
             </TouchableOpacity>
           </View>
         </CameraView>
@@ -78,7 +71,7 @@ export default function Index() {
                   source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
                 />
                 <TouchableOpacity style={styles.retakeButton} onPress={() => handleRetakePhoto(index)}>
-                  <Fontisto name="trash" size={36} color="red" />
+                  <Feather name="trash-2" size={24} color="red" />
                 </TouchableOpacity>
               </View>
             )
@@ -122,7 +115,7 @@ const styles = StyleSheet.create({
   button: {
     marginHorizontal: 20,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 10,
+    padding: 12,
     borderRadius: 50,
   },
   previewContainer: {
@@ -150,10 +143,10 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     marginTop: 20,
-    backgroundColor: 'green',
+    backgroundColor: '#03fc9d',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 25,
+    borderRadius: 12,
   },
   sendButtonText: {
     color: 'white',
