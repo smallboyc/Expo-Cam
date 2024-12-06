@@ -2,10 +2,14 @@ import React, { useState, useRef } from 'react';
 import { CameraView, CameraCapturedPicture, useCameraPermissions } from 'expo-camera';
 import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View, Button, Text } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
+import { APP_BACKEND_URL } from '@env';
+import { EMULATOR_BACKEND_URL } from '@env';
+
+
 
 export default function Index() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [photos, setPhotos] = useState<(CameraCapturedPicture | undefined)[]>([]);  // photos array
+  const [photos, setPhotos] = useState<(CameraCapturedPicture | undefined)[]>([]);
   const cameraRef = useRef<CameraView | null>(null);
 
   if (!permission) {
@@ -24,7 +28,7 @@ export default function Index() {
   }
 
   const handleTakePhoto = async () => {
-    if (cameraRef.current && photos.length < 3) {  // 3 photos max
+    if (cameraRef.current && photos.length < 3) {
       const options = {
         quality: 1,
         base64: true,
@@ -40,12 +44,28 @@ export default function Index() {
   };
 
   const handleRetakePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index); //remove image
+    const newPhotos = photos.filter((_, i) => i !== index);
     setPhotos(newPhotos);
   };
 
-  const handleSendPhotos = () => {
-    console.log("Sending photos...");  // TODO : send image to a new script / OCR ?
+  const handleSendPhotos = async () => {
+
+    const data = photos.map(photo => ({
+      imageName: `img_${photos.indexOf(photo)}.jpg`,
+      imageData: photo?.base64,
+    }));
+
+    fetch(`${EMULATOR_BACKEND_URL}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.json())
+      .then(data => console.log("Success:", data))
+      .catch((error) => console.error("Error:", error));
+
   };
 
   return (
@@ -55,7 +75,6 @@ export default function Index() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
               {photos.length < 3 ? <Feather name="camera" size={40} color="white" /> : <Feather name="camera-off" size={40} color="white" />}
-
             </TouchableOpacity>
           </View>
         </CameraView>
