@@ -27,10 +27,11 @@ export default function Index() {
     );
   }
 
+  //take a photo
   const handleTakePhoto = async () => {
     if (cameraRef.current && photos.length < 3) {
       const options = {
-        quality: 1,
+        quality: 0.1, //adjusting it if necessary for better/less quality
         base64: true,
         exif: false,
       };
@@ -43,19 +44,20 @@ export default function Index() {
     }
   };
 
+  //cancel a photo
   const handleRetakePhoto = (index: number) => {
     const newPhotos = photos.filter((_, i) => i !== index);
     setPhotos(newPhotos);
   };
 
+  //send photo(s) to back-end
   const handleSendPhotos = async () => {
-
     const data = photos.map(photo => ({
       imageName: `img_${photos.indexOf(photo)}.jpg`,
       imageData: photo?.base64,
     }));
 
-    fetch(`${EMULATOR_BACKEND_URL}`, {
+    fetch(`${APP_BACKEND_URL}/process-image/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,6 +69,8 @@ export default function Index() {
       .catch((error) => console.error("Error:", error));
 
   };
+
+
 
   return (
     <SafeAreaView style={styles.container}>
