@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react';
 import { CameraView, CameraCapturedPicture, useCameraPermissions } from 'expo-camera';
 import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View, Button, Text } from 'react-native';
 import Feather from '@expo/vector-icons/Feather';
-import { APP_BACKEND_URL } from '@env';
 import { EMULATOR_BACKEND_URL } from '@env';
+import { APP_BACKEND_URL } from '@env';
 
 
 
@@ -56,8 +56,9 @@ export default function Index() {
       imageName: `img_${photos.indexOf(photo)}.jpg`,
       imageData: photo?.base64,
     }));
+    console.log(data)
 
-    fetch(`${APP_BACKEND_URL}/process-image/`, {
+    fetch(`${EMULATOR_BACKEND_URL}/process-image/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
