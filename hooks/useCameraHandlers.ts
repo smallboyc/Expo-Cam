@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { CameraCapturedPicture, CameraView } from "expo-camera";
-import { EMULATOR_BACKEND_URL } from "@env";
 
 
 export function useCameraHandlers() {
@@ -31,12 +30,13 @@ export function useCameraHandlers() {
 
     //send photo(s) to back-end
     const handleSendPhotos = async () => {
+        const apiUrl = process.env.EXPO_PUBLIC_API_KEY
         const data = photos.map(photo => ({
             imageName: `img_${photos.indexOf(photo)}.jpg`,
             imageData: photo?.base64,
         }));
 
-        fetch(`${EMULATOR_BACKEND_URL}/process-image/`, {
+        fetch(`${apiUrl}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
